@@ -73,7 +73,13 @@ public abstract class MixinClientChunkCache implements ClientChunkCacheDuck {
             }
 
             this.level.onChunkLoaded(pos);
-            SodiumCompat.onChunkAdded(this.level, x, z);
+            if (ValkyrienCommonMixinConfigPlugin.getVSRenderer() == VSRenderer.SODIUM) {
+                // SodiumCompat imports Sodium classes. Even though the methods check
+                // if Sodium is installed by using getVSRenderer(), merely calling anything
+                // from SodiumCompat will crash the game because classes it relies on are not
+                // present. We have to do a manual check to avoid referencing nonexistent classes.
+                SodiumCompat.onChunkAdded(this.level, x, z);
+            }
             cir.setReturnValue(worldChunk);
         }
     }
@@ -96,7 +102,9 @@ public abstract class MixinClientChunkCache implements ClientChunkCacheDuck {
                 ((IVSViewAreaMethods) ((LevelRendererAccessor) ((ClientLevelAccessor) level).getLevelRenderer()).getViewArea())
                     .unloadChunk(chunkX, chunkZ);
             }
-            SodiumCompat.onChunkRemoved(this.level, chunkX, chunkZ);
+            if (ValkyrienCommonMixinConfigPlugin.getVSRenderer() == VSRenderer.SODIUM) {
+                SodiumCompat.onChunkRemoved(this.level, chunkX, chunkZ);
+            }
             ci.cancel();
         }
     }
@@ -110,7 +118,9 @@ public abstract class MixinClientChunkCache implements ClientChunkCacheDuck {
             ((IVSViewAreaMethods) ((LevelRendererAccessor) ((ClientLevelAccessor) level).getLevelRenderer()).getViewArea())
                 .unloadChunk(chunkX, chunkZ);
         }
-        SodiumCompat.onChunkRemoved(this.level, chunkX, chunkZ);
+        if (ValkyrienCommonMixinConfigPlugin.getVSRenderer() == VSRenderer.SODIUM) {
+            SodiumCompat.onChunkRemoved(this.level, chunkX, chunkZ);
+        }
     }
 
     @Inject(
